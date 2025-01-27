@@ -1,5 +1,13 @@
 # Instagram Management Toolkit
 
+## ⚠️ Disclaimer and Important Warnings
+
+### Account Safety
+**CRITICAL NOTICE:** Using automated tools like this can significantly risk your Instagram account:
+
+- **High Risk of Account Restrictions:** Instagram actively monitors and can permanently ban or shadowban accounts using automation tools.
+- **Personal Warning:** From my experience, attempting to use longer delays or more complex timing mechanisms does NOT reduce the risk. In fact, it may increase the likelihood of your account being flagged. I used this on/off for about a week and never got truly flagged until I started stretching my delay-times. I believe the method is to have it function as humanly as possible, which is how it's configured at the moment. Use with caution
+
 ## Overview
 
 A comprehensive Python-based Instagram management tool that provides multiple functionalities for social media management and analysis. This toolkit allows users to efficiently manage their Instagram account with features like follower discovery, mass following, unfollowing non-followers, and detailed relationship insights.
@@ -61,14 +69,6 @@ Follow the on-screen prompts to:
 - Choose your desired action
 - Input Instagram credentials
 - Configure specific operations
-
-## ⚠️ Disclaimer and Important Warnings
-
-### Account Safety
-**CRITICAL NOTICE:** Using automated tools like this can significantly risk your Instagram account:
-
-- **High Risk of Account Restrictions:** Instagram actively monitors and can permanently ban or shadowban accounts using automation tools.
-- **Personal Warning:** From my experience, attempting to use longer delays or more complex timing mechanisms does NOT reduce the risk. In fact, it may increase the likelihood of your account being flagged. I used this on/off for about a week and never got truly flagged until I started stretching my delay-times. I believe the method is to have it function as humanly as possible, which is how it's configured at the moment. Use with caution
 
 ### Potential Consequences
 - Temporary action blocks
