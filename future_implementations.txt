@@ -1,0 +1,18 @@
+some updates I want to add to these files
+
+in the manager, I want to be able to modify a config file that lets me modify aspects of the other scripts without having to restart the application
+
+in discover, I want there to be logic that if the number of selected users reaches the limit while getting users from a following list, then it halts the program such that it never exceeds the maximum desired user count
+
+Instead of having the discovery output to multiple files, it should just continue updating a singular json file.
+
+the json files from the finder should be named appropriately (i.e, if it's a users followers it should be "_followers" and if it is following "_following")
+
+In the config file there should be the ability to modify the delay time between each follow in the follower script
+
+There should be functionality in the manager for deleting a user from the discover json. it should prompt the user for a name (in a loop incase of typos) and if it finds a valid name, delete every attribute in "followers" with a parent attribute equal to that name
+
+add a rule in both discovery and finder where you don't add yourself to the json
+
+add a rule in instagram_follow such that you don't attempt to follow yourself
+
