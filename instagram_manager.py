@@ -4,24 +4,22 @@ import json
 from datetime import datetime
 import random
 import os
-import getpass 
+import getpass
 
 from instagram_finder import InstagramFollowerFetcher
-from instagram_follow import InstagramMassFollower
-from instagram_discover import InstagramFollowerDiscovery
 from instgram_unfollow import InstagramUnfollower
 
 class InstagramManager:
     def __init__(self):
         self.client = Client()
         self.fetcher = None
-        self.follower = None
         self.unfollow_tool = None
         
-        # Create directory if it doesn't exist
+        # Create data directory if it doesn't exist
         self.data_dir = 'data'
         os.makedirs(self.data_dir, exist_ok=True)
         
+        # Update file paths to use data directory
         self.following_cache_file = os.path.join(self.data_dir, 'following_cache.json')
         self.followers_cache_file = os.path.join(self.data_dir, 'followers_cache.json')
         
@@ -99,22 +97,18 @@ class InstagramManager:
             try:
                 print("\n=== Instagram Manager ===")
                 print("1. Fetch followers from a user")
-                print("2. Follow users from JSON file")
-                print("3. Discover a set number of users from your following")
-                print("4. Unfollow non-followers")
-                print("5. Exit")
+                print("2. Unfollow non-followers")
+                print("3. Exit")
                 
-                choice = input("\nEnter your choice (1-5): ")
+                choice = input("\nEnter your choice (1-3): ")
                 
                 if choice == "1":
+                    self._initialize_shared_tools()
                     self.run_fetcher()
                 elif choice == "2":
-                    self.run_follower()
-                elif choice == "3":
-                    self.run_discover()
-                elif choice == "4":
+                    self._initialize_shared_tools()
                     self.run_unfollow()
-                elif choice == "5":
+                elif choice == "3":
                     print("Goodbye!")
                     break
                 else:
@@ -154,30 +148,24 @@ class InstagramManager:
         self.fetcher.client = self.client
         self.fetcher.user_id = self.client.user_id
 
-        # Get cached relationships
-        following_cache, _ = self._initialize_shared_tools()
-        self.fetcher.my_following = set(following_cache.keys())
-        self.fetcher.my_following_usernames = {
-            pk: {'username': username, 'full_name': username} 
-            for pk, username in following_cache.items()
-        }
-
         while True:
             target_username = input("\nEnter the username whose followers you want to fetch (or 'random' for random pick): ")
             
             if target_username.lower() == 'random':
-                while True:
-                    random_user = self.fetcher.get_random_following()
-                    if not random_user:
-                        return
-                        
-                    print(f"\nRandom pick: {random_user}")
-                    confirm = input("Would you like to fetch followers for this user? (y/n): ")
-                    
-                    if confirm.lower() == 'y':
-                        target_username = random_user
-                        break
-                    print("\nRolling again...")
+                # Get random following username from cache
+                following_cache, _ = self._load_relationship_cache()
+                if not following_cache:
+                    print("No following list available. Please try again.")
+                    return
+                
+                random_user = random.choice(list(following_cache.values()))
+                print(f"\nRandom pick: {random_user}")
+                confirm = input("Would you like to fetch followers for this user? (y/n): ")
+                
+                if confirm.lower() != 'y':
+                    continue
+                
+                target_username = random_user
             
             target_user_id = self.fetcher.get_user_id(target_username)
             if target_user_id:
@@ -205,6 +193,7 @@ class InstagramManager:
             print("Failed to fetch followers after multiple attempts. Please try again later.")
             return
         
+        # Modify save_followers_to_file to use data directory
         output_data = {
             'target_user': target_username,
             'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -220,89 +209,23 @@ class InstagramManager:
         # Ensure the data directory exists
         os.makedirs(self.data_dir, exist_ok=True)
         
+        # Generate filename in the data directory
         filename = os.path.join(self.data_dir, f'{target_username}_followers.json')
         
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(output_data, f, indent=4, ensure_ascii=False)
             
         print(f"\nFollowers list saved to {filename}")
-    
-    def run_follower(self):
-        """Run the mass follower functionality"""        
-        self.follower = InstagramMassFollower()
-        self.follower.client = self.client
-        self.follower.user_id = self.client.user_id
-
-        filename = input("Enter the path to your JSON file: ")
-        json_data = self.follower.load_json_data(filename)
-        
-        if not json_data:
-            return
-            
-        self.follower.follow_users(json_data, filename)
-
-    def run_discover(self):
-        """Run user discovery functionality"""
-        self.discover = InstagramFollowerDiscovery()
-        self.discover.client = self.client
-        self.discover.user_id = self.client.user_id
-
-        # Get cached relationships
-        following_cache, followers_cache = self._initialize_shared_tools()
-        self.discover.my_following = set(following_cache.keys())
-        self.discover.my_followers = set(followers_cache.keys())
-        self.discover.my_following_usernames = {
-            pk: {'username': username, 'full_name': username} 
-            for pk, username in following_cache.items()
-        }
-
-        while True:
-            try:
-                target = input("Enter target number of users to find (default 5000): ").strip()
-                if target == "":
-                    self.discover.target_users = 5000
-                    break
-                target = int(target)
-                if target > 0:
-                    self.discover.target_users = target
-                    break
-                else:
-                    print("Please enter a positive number")
-            except ValueError:
-                print("Please enter a valid number")
-
-        def custom_save_results(self):
-            output_data = {
-                'total_users_found': len(self.potential_follows),
-                'searched_users': self.search_history,
-                'followers': self.potential_follows
-            }
-            
-            filename = os.path.join(self.data_dir, f'discovery_{datetime.now().strftime("%Y%m%d_%H%M%S")}.json')
-            
-            with open(filename, 'w', encoding='utf-8') as f:
-                json.dump(output_data, f, indent=4, ensure_ascii=False)
-                
-            print(f"\nResults saved to {filename}")
-        
-        # Replace save_results method temporarily
-        original_save_results = self.discover.save_results
-        self.discover.save_results = custom_save_results.__get__(self.discover)
-        
-        try:
-            self.discover.discover_follows()
-        finally:
-            # Restore original method
-            self.discover.save_results = original_save_results
 
     def run_unfollow(self):
         """Run unfollow tool"""
+        # Initialize unfollow tool
         self.unfollow_tool = InstagramUnfollower()
         self.unfollow_tool.client = self.client
         self.unfollow_tool.user_id = self.client.user_id
 
         # Get cached relationships
-        following_cache, followers_cache = self._initialize_shared_tools()
+        following_cache, followers_cache = self._load_relationship_cache()
 
         # Find non-followers
         non_followers = []
@@ -318,62 +241,42 @@ class InstagramManager:
         for user in non_followers:
             print(f"- {user['username']}")
         
+        # Confirm before unfollowing
         if input("\nWould you like to unfollow these users? (y/n): ").lower() != 'y':
             print("Operation cancelled")
             return
         
         delay_range = (0.1, 0.3)
         
-        def custom_save_log(unfollowed_users):
-            log_data = {
-                'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'unfollowed_users': unfollowed_users
-            }
-            
-            # Ensure directory exists
-            os.makedirs(self.data_dir, exist_ok=True)
-            
-            log_filename = os.path.join(self.data_dir, 'unfollow_log.json')
-            
-            with open(log_filename, 'a') as f:
-                json.dump(log_data, f)
-                f.write('\n')
+        # Perform unfollow
+        success, failed = self.unfollow_tool.unfollow_users(non_followers, delay_range)
         
-        # Replace save_log method temporarily
-        original_save_log = self.unfollow_tool.save_log
-        self.unfollow_tool.save_log = custom_save_log
+        # Update cache after unfollowing
+        if success > 0:
+            # Remove unfollowed users from cache
+            for user in non_followers[:success]:
+                if user['user_id'] in following_cache:
+                    del following_cache[user['user_id']]
+            
+            # Save updated cache
+            self._save_relationship_cache(following_cache, followers_cache)
         
-        try:
-            # Perform unfollow
-            success, failed = self.unfollow_tool.unfollow_users(non_followers, delay_range)
-            
-            # Update cache after unfollowing
-            if success > 0:
-                # Remove unfollowed users from cache
-                for user in non_followers[:success]:
-                    if user['user_id'] in following_cache:
-                        del following_cache[user['user_id']]
-                
-                # Save updated cache
-                self._save_relationship_cache(following_cache, followers_cache)
-            
-            # Save results to log
-            self.unfollow_tool.save_log(non_followers)
-            
-            # Show results
-            print(f"\nOperation complete:")
-            print(f"Successfully unfollowed: {success}")
-            print(f"Failed to unfollow: {failed}")
+        # Save results to log
+        self.unfollow_tool.save_log(non_followers)
         
-        finally:
-            self.unfollow_tool.save_log = original_save_log
+        # Show results
+        print(f"\nOperation complete:")
+        print(f"Successfully unfollowed: {success}")
+        print(f"Failed to unfollow: {failed}")
 
 def main():
     manager = InstagramManager()
     
+    # Get credentials once with hidden password input
     username = input("Enter your Instagram username: ")
     password = getpass.getpass("Enter your Instagram password: ")
     
+    # Login
     if not manager.login(username, password):
         return
     
