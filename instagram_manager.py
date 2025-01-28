@@ -266,8 +266,7 @@ class InstagramManager:
             return
         
         # Ask for delay preference
-        use_safe_mode = input("Use safer, longer delays between unfollows? (recommended) (y/n): ").lower() == 'y'
-        delay_range = (45, 60) if use_safe_mode else (30, 45)
+        delay_range = (0.1, 0.3)
         
         # Perform unfollow
         success, failed = self.unfollow_tool.unfollow_users(non_followers, delay_range)
