@@ -7,12 +7,14 @@ import os
 import getpass
 
 from instagram_finder import InstagramFollowerFetcher
+from instagram_follow import InstagramMassFollower
 from instgram_unfollow import InstagramUnfollower
 
 class InstagramManager:
     def __init__(self):
         self.client = Client()
         self.fetcher = None
+        self.follower = None
         self.unfollow_tool = None
         
         # Create data directory if it doesn't exist
@@ -97,18 +99,21 @@ class InstagramManager:
             try:
                 print("\n=== Instagram Manager ===")
                 print("1. Fetch followers from a user")
-                print("2. Unfollow non-followers")
-                print("3. Exit")
+                print("2. Follow users from JSON file")
+                print("3. Unfollow non-followers")
+                print("4. Exit")
                 
-                choice = input("\nEnter your choice (1-3): ")
+                choice = input("\nEnter your choice (1-4): ")
                 
                 if choice == "1":
                     self._initialize_shared_tools()
                     self.run_fetcher()
                 elif choice == "2":
+                    self.run_follower()
+                elif choice == "3":
                     self._initialize_shared_tools()
                     self.run_unfollow()
-                elif choice == "3":
+                elif choice == "4":
                     print("Goodbye!")
                     break
                 else:
@@ -217,6 +222,20 @@ class InstagramManager:
             
         print(f"\nFollowers list saved to {filename}")
 
+    def run_follower(self):
+        """Run the mass follower functionality"""        
+        self.follower = InstagramMassFollower()
+        self.follower.client = self.client
+        self.follower.user_id = self.client.user_id
+
+        filename = input("Enter the path to your JSON file: ")
+        json_data = self.follower.load_json_data(filename)
+        
+        if not json_data:
+            return
+            
+        self.follower.follow_users(json_data, filename)
+
     def run_unfollow(self):
         """Run unfollow tool"""
         # Initialize unfollow tool
@@ -246,7 +265,9 @@ class InstagramManager:
             print("Operation cancelled")
             return
         
-        delay_range = (0.1, 0.3)
+        # Ask for delay preference
+        use_safe_mode = input("Use safer, longer delays between unfollows? (recommended) (y/n): ").lower() == 'y'
+        delay_range = (45, 60) if use_safe_mode else (30, 45)
         
         # Perform unfollow
         success, failed = self.unfollow_tool.unfollow_users(non_followers, delay_range)
