@@ -10,27 +10,22 @@
 
 ## Overview
 
-A comprehensive Python-based Instagram management tool that provides multiple functionalities for social media management and analysis. This toolkit allows users to efficiently manage their Instagram account with features like follower discovery, mass following, unfollowing non-followers, and detailed relationship insights.
+A comprehensive Python-based Instagram management tool that provides multiple functionalities for social media management and analysis. This toolkit allows users to efficiently manage their Instagram account with features like, following mutual followers, unfollowing non-followers, and detailed relationship insights.
 
 ## 🌟 Features
 
-### 1. Follower Fetcher
+### 1. Fetch Followers
 - Fetch followers or following list for any Instagram user
 - Option to select a random user from your following list
 - Detailed relationship insights
 - Save results to JSON for further analysis
 
-### 2. Mass Follower
+### 2. Follow from JSON
 - Follow users from a pre-generated JSON file
 - Intelligent following with rate limiting
 - Customizable follow strategy
 
-### 3. User Discovery
-- Discover potential followers from your existing network
-- Configurable target number of users
-- Save discovered users to JSON
-
-### 4. Unfollow Non-Followers
+### 3. Unfollow Non-Followers
 - Identify users who don't follow you back
 - Bulk unfollow with customizable delay
 - Logging of unfollow actions
